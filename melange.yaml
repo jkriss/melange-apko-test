@@ -1,0 +1,60 @@
+package:
+  name: melange-apko-test
+  version: 0.1.0
+  description: Test project for melange + apko builds
+  target-architecture:
+    - all
+  copyright:
+    - license: UNLICENSED
+      paths:
+        - '*'
+  dependencies:
+    runtime:
+      - nodejs
+      - npm
+      - tailscale
+
+environment:
+  contents:
+    repositories:
+      - https://dl-cdn.alpinelinux.org/alpine/edge/main
+      - https://dl-cdn.alpinelinux.org/alpine/edge/community
+    packages:
+      - alpine-baselayout-data
+      - ca-certificates-bundle
+      - busybox
+      - nodejs
+      - npm
+      
+      # for node packages with native dependencies
+      # - make
+      # - python3
+      # - gcc
+
+      # secure networking
+      - tailscale
+
+pipeline:
+  - name: Build Node application
+    runs: |
+      # npm i -g pnpm
+      # EXECDIR="${{targets.destdir}}/usr/bin"
+      # WEBAPPDIR="${{targets.destdir}}/usr/share/webapps/${{package.name}}"
+      # echo "created ${EXECDIR} and ${WEBAPPDIR}"
+      # echo "current dir: ${PWD}"
+      # mkdir -p "${EXECDIR}" "${WEBAPPDIR}"
+      # echo "#!/usr/bin/env sh" > "${EXECDIR}/${{package.name}}"
+      # echo "npm run start" > "${EXECDIR}/${{package.name}}"
+      # (cd "${WEBAPPDIR}" && npm install --omit=dev)
+      EXECDIR="${{targets.destdir}}/usr/bin"
+      WEBAPPDIR="${{targets.destdir}}/usr/share/webapps/${{package.name}}"
+      mkdir -p "${EXECDIR}" "${WEBAPPDIR}"
+      echo "#!/usr/bin/env node" > "${EXECDIR}/${{package.name}}"
+      echo "process.env.NODE_PATH = '/usr/share/webapps/${{package.name}}/node_modules';" >> "${EXECDIR}/${{package.name}}"
+      echo "require('module').Module._initPaths();" >> "${EXECDIR}/${{package.name}}"
+      cat main.js >> "${EXECDIR}/${{package.name}}"
+      chmod +x "${EXECDIR}/${{package.name}}"
+      cp package.json "${WEBAPPDIR}"
+      cp package-lock.json "${WEBAPPDIR}"
+      (cd "${WEBAPPDIR}" && npm install --no-bin-links --omit=dev)
+
