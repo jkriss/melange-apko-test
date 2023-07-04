@@ -37,24 +37,25 @@ environment:
 pipeline:
   - name: Build Node application
     runs: |
+      # export npm_config_cache=/work/.npm
       # npm i -g pnpm
-      # EXECDIR="${{targets.destdir}}/usr/bin"
-      # WEBAPPDIR="${{targets.destdir}}/usr/share/webapps/${{package.name}}"
-      # echo "created ${EXECDIR} and ${WEBAPPDIR}"
-      # echo "current dir: ${PWD}"
-      # mkdir -p "${EXECDIR}" "${WEBAPPDIR}"
-      # echo "#!/usr/bin/env sh" > "${EXECDIR}/${{package.name}}"
-      # echo "npm run start" > "${EXECDIR}/${{package.name}}"
-      # (cd "${WEBAPPDIR}" && npm install --omit=dev)
       EXECDIR="${{targets.destdir}}/usr/bin"
       WEBAPPDIR="${{targets.destdir}}/usr/share/webapps/${{package.name}}"
       mkdir -p "${EXECDIR}" "${WEBAPPDIR}"
-      echo "#!/usr/bin/env node" > "${EXECDIR}/${{package.name}}"
-      echo "process.env.NODE_PATH = '/usr/share/webapps/${{package.name}}/node_modules';" >> "${EXECDIR}/${{package.name}}"
-      echo "require('module').Module._initPaths();" >> "${EXECDIR}/${{package.name}}"
-      cat main.js >> "${EXECDIR}/${{package.name}}"
-      chmod +x "${EXECDIR}/${{package.name}}"
+
+      # pnpm install --prod
+      # pnpm build
+      npm install --no-bin-links --omit=dev
+      ./node_modules/next/dist/bin/next build
       cp package.json "${WEBAPPDIR}"
-      cp package-lock.json "${WEBAPPDIR}"
-      (cd "${WEBAPPDIR}" && npm install --no-bin-links --omit=dev)
+      cp pnpm-lock.yaml "${WEBAPPDIR}"
+      cp -r node_modules "${WEBAPPDIR}"
+      cp -r .next "${WEBAPPDIR}"
+      cp -r public "${WEBAPPDIR}"
+
+      echo "#!/bin/sh" >> "${EXECDIR}/${{package.name}}"
+      # echo "pnpm start" >> "${EXECDIR}/${{package.name}}"
+      echo "cd /usr/share/webapps/${{package.name}} && ./node_modules/next/dist/bin/next start" >> "${EXECDIR}/${{package.name}}"
+      chmod +x "${EXECDIR}/${{package.name}}"
+
 

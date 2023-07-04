@@ -14,4 +14,5 @@ docker run --privileged --rm -it -v "${PWD}:/work" -w /work cgr.dev/chainguard/s
 
 # then get out of the builder
 # exit
+# docker load < output.tar
 # docker run -p 8080:8080 --rm factory-demo:latest-arm64

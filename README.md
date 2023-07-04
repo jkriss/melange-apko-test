@@ -18,13 +18,29 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+# Requirements
+
+Use podman (or Docker)
+
+```
+brew install podman
+podman machine init
+podman machine start
+```
+
 # Building
 
 ```
 podman run --rm -v "${PWD}":/work --workdir=/work cgr.dev/chainguard/melange keygen
 
-podman run --privileged --rm -v "${PWD}":/work  cgr.dev/chainguard/melange build --arch host --signing-key melange.rsa melange.yaml
+podman run --privileged --rm -v "${PWD}":/work cgr.dev/chainguard/melange build --arch host --signing-key melange.rsa melange.yaml
 
-# this one still doesn't work. old apko?
 podman run --privileged  -v "$PWD":/work cgr.dev/chainguard/apko build --arch host -k melange.rsa.pub apko.yaml melange-apko-test output.tar
+```
+
+# Running
+
+```
+podman load < output.tar
+podman run -p 8080:8080 --rm melange-apko-test:latest-arm64
 ```
